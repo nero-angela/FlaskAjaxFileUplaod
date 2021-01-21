@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Upload Example</title>
+    <!--  jquery  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        .image-columns {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            padding: 64px;
+        }
+
+        .image-columns img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            margin: 32px;
+        }
+
+        .image-uploader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 32px;
+        }
+    </style>
+    <script>
+        $(document).ready(() => {
+            getImage()
+        })
+
+        function getImage() {
+            $.ajax({
+                type: 'GET',
+                url: '/image',
+                success: function(res) {
+                    let images = res['images']
+                    for (let i = 0; i < images.length; i++) {
+                        let image = images[i]
+                        console.log(image)
+                        let temp = `<img src="${image}" alt="image${i}">`
+                        $('.image-columns').append(temp)
+                    }
+                }
+            })
+        }
+
+        function uploadImage() {
+            let images = $('#image-input')[0].files[0]
+            if (images === undefined) {
+                alert('please select image')
+                return
+            }
+
+            let formData = new FormData();
+            formData.append("images", images)
+
+            $.ajax({
+                type: "POST",
+                url: "/image",
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (res) {
+                    if (res['result'] === 'success') {
+                        alert('success to upload')
+                        location.reload()
+                    } else {
+                        alert('fail to upload')
+                        console.error(res['error'])
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<div class="image-uploader">
+    <input type="file" id="image-input" onchange="uploadImage()">
+</div>
+
+<hr>
+
+<div class="image-columns">
+</div>
+
+</body>
+</html>
